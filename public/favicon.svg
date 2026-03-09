@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="leafGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Stem -->
+  <rect x="46" y="40" width="8" height="45" fill="#558B2F" rx="2"/>
+  <!-- Left leaf -->
+  <ellipse cx="35" cy="50" rx="18" ry="12" fill="url(#leafGradient)" transform="rotate(-25 35 50)"/>
+  <!-- Right leaf -->
+  <ellipse cx="65" cy="45" rx="18" ry="12" fill="url(#leafGradient)" transform="rotate(25 65 45)"/>
+  <!-- Top leaf -->
+  <ellipse cx="50" cy="32" rx="15" ry="10" fill="url(#leafGradient)"/>
+  <!-- Soil base -->
+  <ellipse cx="50" cy="88" rx="28" ry="8" fill="#8D6E63"/>
+</svg>

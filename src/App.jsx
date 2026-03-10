@@ -37,6 +37,8 @@ const screenshotSlots = [
 function App() {
   const [missingImages, setMissingImages] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const markImageAsMissing = (id) => {
     setMissingImages((current) => ({
@@ -47,6 +49,24 @@ function App() {
 
   const openModal = (slot) => {
     setSelectedImage(slot);
+  };
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 8000);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % screenshotSlots.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 8000);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + screenshotSlots.length) % screenshotSlots.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 8000);
   };
 
   const closeModal = () => {
@@ -83,6 +103,16 @@ function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedImage]);
+
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % screenshotSlots.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
 
   return (
     <div className="page-shell">
@@ -201,46 +231,80 @@ function App() {
             </div>
           </div>
 
-          <div className="gallery-grid">
-            {screenshotSlots.map((slot, index) => (
-              <article
-                key={slot.id}
-                className="capture-card"
-                style={{ '--delay': `${index * 90}ms` }}
+          <div className="slider-container">
+            <div className="slider-wrapper">
+              <div 
+                className="slider-track" 
+                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
               >
-                {missingImages[slot.id] ? (
-                  <div className="capture-placeholder" role="img" aria-label={slot.title}>
-                    <span>Agrega captura aqui</span>
+                {screenshotSlots.map((slot) => (
+                  <div key={slot.id} className="slider-slide">
+                    {missingImages[slot.id] ? (
+                      <div className="slider-placeholder" role="img" aria-label={slot.title}>
+                        <span>Agrega captura aquí</span>
+                      </div>
+                    ) : (
+                      <div className="slider-image-wrapper" onClick={() => openModal(slot)}>
+                        <img
+                          className="slider-image"
+                          src={slot.image}
+                          alt={slot.title}
+                          onError={() => markImageAsMissing(slot.id)}
+                        />
+                        <div className="image-overlay">
+                          <svg
+                            className="eye-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="capture-image-wrapper" onClick={() => openModal(slot)}>
-                    <img
-                      className="capture-image"
-                      src={slot.image}
-                      alt={slot.title}
-                      loading="lazy"
-                      onError={() => markImageAsMissing(slot.id)}
-                    />
-                    <div className="image-overlay">
-                      <svg
-                        className="eye-icon"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    </div>
-                  </div>
-                )}
-                <div className="capture-copy">
-                  <h3>{slot.title}</h3>
-                  <p>{slot.summary}</p>
-                </div>
-              </article>
-            ))}
+                ))}
+              </div>
+
+              <button 
+                className="slider-nav slider-nav-prev" 
+                onClick={prevSlide}
+                aria-label="Anterior"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+
+              <button 
+                className="slider-nav slider-nav-next" 
+                onClick={nextSlide}
+                aria-label="Siguiente"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            <div className="slider-info">
+              <h3>{screenshotSlots[currentSlide].title}</h3>
+              <p>{screenshotSlots[currentSlide].summary}</p>
+            </div>
+
+            <div className="slider-dots">
+              {screenshotSlots.map((_, index) => (
+                <button
+                  key={index}
+                  className={`slider-dot ${index === currentSlide ? 'active' : ''}`}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Ir a slide ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </section>
       </main>
